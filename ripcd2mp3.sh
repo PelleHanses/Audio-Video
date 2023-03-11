@@ -58,6 +58,7 @@ do
    skip_first=false  
    rm "$file"
   else
+   echo "  * Converting $file to mp3"
     # Convert wav to mp3
     lame -m j -b 256 "$file" 
 
@@ -73,20 +74,21 @@ do
     extension="${filename##*.}"
     filename="${filename%.*}"
 
-    # Sätter taggar
+    echo "  * Setting mp3 tag - mp3tag"
     mp3tag \
   	-a "$book_serie" \
-  	-s "$track_name_start - $book_nam" \
-  	-l "$track_name_start - $book_name" \
-  	-k "$track_name_start" \
-  	"$track_name_start - $book_name.mp3"
+  	-s "$book_name" \
+  	-l "$book_name" \
+  	-k "$track_nr" \
+  	"$filename.mp3"
   	# mp3tag sätter endast IDv1 medans mid3v2 sätter IDv2
+    echo "  * Setting mp3 tag - mid3v2"
     mid3v2 \
   	--artist="$book_serie" \
   	--album="$book_nr - $book_name" \
-  	--song="$track_name_start - $book_name.mp3" \
+  	--song="$track_name_start - $book_name" \
   	--track="$track_name_start" \
-  	"$track_name_start - $book_name.mp3"
+  	"$filename.mp3"
 
     mv "$filename.mp3" "$track_name_start - $book_name.mp3"
 

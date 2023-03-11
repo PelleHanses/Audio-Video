@@ -45,8 +45,8 @@ then
 else
     mp3_folde=$book_name
 fi
-mkdir -p ./wav
 mkdir -p ./"$mp3_folder"
+cd ./"$mp3_folder"
 
 # Rip CD to wav
 cdparanoia -B
@@ -56,7 +56,7 @@ do
   if [ $track_nr == 1 ] && [ $skip_first == true ] 
   then
    skip_first=false  
-   mv "$file" ./wav/
+   rm "$file"
   else
     # Convert wav to mp3
     lame -m j -b 256 "$file" 
@@ -88,10 +88,9 @@ do
   	--track="$track_name_start" \
   	"$track_name_start - $book_name.mp3"
 
-    mv "$file" ./wav/
-    mv "$filename.mp3" "./$mp3_folder/$track_name_start - $book_name.mp3"
+    mv "$filename.mp3" "$track_name_start - $book_name.mp3"
 
     track_nr=$((track_nr+1))
   fi
 done
-rm -fr ./wav
+rm -fr ./*.wav

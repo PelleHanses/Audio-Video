@@ -39,16 +39,14 @@ then
   exit 1
 fi
 
-
-mkdir -p ./wav
 if [ $book_serie > 0 ]
 then
-    mp3_folder=$book_serie." - ".$book_name
+    mp3_folder="$book_serie/$book_nr - $book_name"
 else
-    mp3_folder=$book_name
+    mp3_folde=$book_name
 fi
 mkdir -p ./wav
-mkdir -p ./$mp3_folder
+mkdir -p ./"$mp3_folder"
 
 # Rip CD to wav
 cdparanoia -B

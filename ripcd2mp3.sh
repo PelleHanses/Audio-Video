@@ -66,7 +66,7 @@ do
     track_name_start=$(printf "%02d" $track_nr)    
     if [ $cd_nr > 0 ]
     then
-        track_name_start=$cd_nr_zero."-".$track_name_start
+        track_name_start="$cd_nr_zero - $track_name_start"
     fi
 
     filename=$(basename -- "$file")

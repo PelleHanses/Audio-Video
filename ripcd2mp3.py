@@ -16,6 +16,8 @@ def rip_cd_to_mp3(output_dir, title, artist, album, bitrate, tracknr):
 
     # Get the list of WAV files in the current directory
     wav_files = [file for file in os.listdir('.') if file.endswith('.wav')]
+    # Sort the files by name (in lexicographic order)
+    wav_files = sorted(wav_files)
 
     # Set the MP3 tags and convert to desired bitrate
     for wav_file in wav_files:

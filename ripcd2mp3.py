@@ -17,11 +17,18 @@ def rip_cd_to_mp3(output_dir, title, artist, album, bitrate, tracknr):
     subprocess.call(['cdparanoia', '-B'])
 
     # Get the list of WAV files in the current directory
+<<<<<<< HEAD
     #wav_files = [file for file in os.listdir('.') if file.endswith('.wav')]
     wav_files = glob.glob(os.path.join(".", "*.wav"))
     print("Osorterade -------------------------" + str(wav_files))
     wav_files = sorted(wav_files, key=lambda x: os.path.getctime(x))
     print("Sorterade -------------------------" + str(wav_files))
+=======
+    wav_files = [file for file in os.listdir('.') if file.endswith('.wav')]
+    # Sort the files by name (in lexicographic order)
+    wav_files = sorted(wav_files)
+
+>>>>>>> 981af5fffe17a5a9ebc8020df80a331a42f61508
     # Set the MP3 tags and convert to desired bitrate
     for wav_file in wav_files:
         #mp3_file = os.path.join(output_dir, os.path.splitext(wav_file)[0] + '.mp3')

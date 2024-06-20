@@ -9,6 +9,7 @@ from mutagen.id3 import ID3, ID3NoHeaderError
 def rip_cd_to_wav(first_track_nr, wav_dir):
     os.makedirs(wav_dir, exist_ok=True)
     track_nr = first_track_nr
+    #return wav_dir
     while True:
         wav_file = os.path.join(wav_dir, f'track_{track_nr:02d}.wav')
         result = subprocess.run(['cdparanoia', '-q', f'{track_nr}', wav_file], capture_output=True)

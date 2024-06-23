@@ -25,3 +25,9 @@ Options:
   --skip_last {yes,no}              Optional. Skip the last track (yes/no). Default is 'no'.
   --nr_length NR_LENGTH             Optional. Number length for track numbering. Default is 3.
   --verbose VERBOSE                 Optional. Show more info. (0/1/2)
+
+## Tip
+To show what is happening, open another terminal and run
+```
+ls -lth --time-style=long-iso ./OUTPUT_DIR | awk '{printf "\"%s\"   %s %s   %s\n",substr($0, index($0,$8)),$6,$7,$5}'
+```

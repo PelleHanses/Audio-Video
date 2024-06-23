@@ -6,12 +6,34 @@ import argparse
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, ID3NoHeaderError
 
-def rip_cd_to_wav(first_track_nr, wav_dir):
+def clean_up():
+    # Delete the script file executable
+    command = "rm watch_process_wav.sh" 
+    subprocess.run(command, shell=True, check=True)
+
+def create_watch_script(watch_dir, script_file):
+    print(f"  To follow progress, you can run the script \"watch ./{script_file}\" in another terminal. End it with Ctrl+C")
+    bash_script_content = f'''#!/bin/bash
+    ls -lth --time-style=long-iso "{watch_dir}" | awk '{{printf "\\"%s\\"   %s %s   %s\\n",substr($0, index($0,$8)),$6,$7,$5}}'
+    '''
+    # Write the content to the bash script file
+    with open(script_file, 'w') as file:
+        file.write(bash_script_content)
+    # Do the script file executable
+    command = "chmod u+x " + script_file
+    subprocess.run(command, shell=True, check=True)
+
+def rip_cd_to_wav(first_track_nr, wav_dir, verbose):
+    create_watch_script(wav_dir, "watch_process_wav.sh")
     os.makedirs(wav_dir, exist_ok=True)
     track_nr = first_track_nr
     #return wav_dir
+    if verbose >= 1:
+            print(f"  + Ripping track:")
     while True:
         wav_file = os.path.join(wav_dir, f'track_{track_nr:02d}.wav')
+        if verbose >= 1:
+            print(f"    track_{track_nr:02d}.wav")
         result = subprocess.run(['cdparanoia', '-q', f'{track_nr}', wav_file], capture_output=True)
         if result.returncode != 0:
             break
@@ -93,7 +115,7 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
 
     wav_dir = os.path.join(args.output_dir, 'wav_files')
-    rip_cd_to_wav(args.first_track_nr, wav_dir)
+    rip_cd_to_wav(args.first_track_nr, wav_dir, args.verbose)
 
     convert_wav_to_mp3(wav_dir, args.title, args.artist, args.album, args.output_dir, args.album_nr, args.mp3_bitrate, args.first_track_nr, args.start_track_num, args.skip_last, args.nr_length, args.verbose)
 
@@ -101,6 +123,8 @@ def main():
         print(f"  Deletes file {wav_file} in {wav_dir,}.")
         os.remove(os.path.join(wav_dir, wav_file))
     os.rmdir(wav_dir)
+
+    clean_up()
 
 if __name__ == '__main__':
     main()

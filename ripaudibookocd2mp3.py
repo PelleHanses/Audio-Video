@@ -38,6 +38,9 @@ def rip_cd_to_wav(first_track_nr, wav_dir, verbose):
         if result.returncode != 0:
             break
         track_nr += 1
+    # Eject the CD/DVD drive on Linux
+    subprocess.run(['eject'], check=True)
+
     return wav_dir
 
 def convert_wav_to_mp3(wav_dir, title, artist, album, output_dir, album_nr, mp3_bitrate, first_track_nr, start_track_num, skip_last, nr_length, verbose):

@@ -5,6 +5,7 @@ import subprocess
 import argparse
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, ID3NoHeaderError
+import sys
 
 def clean_up():
     # Delete the script file executable
@@ -97,6 +98,14 @@ def convert_wav_to_mp3(wav_dir, title, artist, album, output_dir, album_nr, mp3_
 
             track_num += 1
 
+def save_command_to_file(filename="last_run.txt"):
+    # Get the full command with arguments
+    command = " ".join(sys.argv)
+    
+    # Save the command to the specified file
+    with open(filename, "w") as file:
+        file.write(command)
+
 def main():
     parser = argparse.ArgumentParser(description='Rip audio CD to MP3 files with metadata.')
     parser.add_argument('--title', type=str, required=True, help='Title of the tracks.')
@@ -120,6 +129,8 @@ def main():
     wav_dir = os.path.join(args.output_dir, 'wav_files')
     rip_cd_to_wav(args.first_track_nr, wav_dir, args.verbose)
 
+
+
     convert_wav_to_mp3(wav_dir, args.title, args.artist, args.album, args.output_dir, args.album_nr, args.mp3_bitrate, args.first_track_nr, args.start_track_num, args.skip_last, args.nr_length, args.verbose)
 
     for wav_file in os.listdir(wav_dir):
@@ -130,5 +141,5 @@ def main():
     clean_up()
 
 if __name__ == '__main__':
+    save_command_to_file()
     main()
-

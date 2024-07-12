@@ -6,6 +6,7 @@ import argparse
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, ID3NoHeaderError
 import sys
+import re
 
 def clean_up():
     # Delete the script file executable
@@ -23,6 +24,24 @@ def create_watch_script(watch_dir, script_file):
     # Do the script file executable
     command = "chmod u+x " + script_file
     subprocess.run(command, shell=True, check=True)
+
+def get_next_track_num(output_dir):
+    """
+    Scans the output directory for files matching the pattern and returns the next available track number.
+    """
+    highest_track_num = 0
+    # Regular expression to match files starting with numbers followed by a hyphen and optional spaces
+    track_file_pattern = re.compile(r'^0*(\d+)\s*-\s*')
+
+    # Scan the directory for files matching the pattern
+    for filename in os.listdir(output_dir):
+        match = track_file_pattern.match(filename)
+        if match:
+            track_num = int(match.group(1))
+            highest_track_num = max(highest_track_num, track_num)
+    
+    # Return the next available track number
+    return highest_track_num + 1
 
 def rip_cd_to_wav(first_track_nr, wav_dir, verbose):
     create_watch_script(wav_dir, "watch_process_wav.sh")
@@ -44,7 +63,7 @@ def rip_cd_to_wav(first_track_nr, wav_dir, verbose):
 
     return wav_dir
 
-def convert_wav_to_mp3(wav_dir, title, artist, album, output_dir, album_nr, mp3_bitrate, first_track_nr, start_track_num, skip_last, nr_length, verbose):
+def convert_wav_to_mp3(wav_dir, title, artist, album, output_dir, album_nr, mp3_bitrate, first_track_nr, next_track_num, skip_last, nr_length, verbose):
     if verbose >= 2:
         print(f"wav_dir: {wav_dir}")
         print(f"title: {title}")
@@ -54,11 +73,11 @@ def convert_wav_to_mp3(wav_dir, title, artist, album, output_dir, album_nr, mp3_
         print(f"album_nr: {album_nr}")
         print(f"mp3_bitrate: {mp3_bitrate}")
         print(f"first_track_nr: {first_track_nr}")
-        print(f"start_track_num: {start_track_num}")
+        print(f"next_track_num: {next_track_num}")
         print(f"skip_last: {skip_last}")
         print(f"nr_length: {nr_length}")
         print(f"first_track_nr: {first_track_nr}")
-    track_num = start_track_num
+    track_num = next_track_num
     wav_files = sorted(os.listdir(wav_dir))  # Sort the WAV files by their filenames
     print(f"  + Creating file:")
     for wav_file in wav_files:
@@ -116,7 +135,7 @@ def main():
     parser.add_argument("--album_nr", type=str, default=0, help="Optional. Number of the album. Default is none.")
     parser.add_argument('--mp3_bitrate', type=str, default='256k', help='Optional. MP3 bitrate (e.g., 192k, 256k, 320k), default is 256k.')
     parser.add_argument('--first_track_nr', type=int, default=1, help='Optional. First track number to start ripping from (e.g., 2 to skip the first track). Default is 1.')
-    parser.add_argument('--start_track_num', type=int, default=1, help='Optional. Starting track number for naming purposes. Default is 1.')
+    parser.add_argument('--next_track_num', type=int, default=0, help='Optional. Starting track number for naming purposes. 0 = auto, finds next free nr. Default is 0.')
     parser.add_argument("--skip_last", type=str, choices=['yes', 'no'], default='no', help="Optional. Skip the last track (yes/no). Default is 'no'.")
     parser.add_argument("--nr_length", type=int, default=3, help="Optional. Number length for track numbering. Default is 3.")
     parser.add_argument("--verbose", type=int, default=0, help="Optional. Show more info. (0/1/2)")
@@ -126,12 +145,16 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
 
+    if args.next_track_num == 0:
+        args.next_track_num = get_next_track_num(args.output_dir)
+        print(f"Next track nr to use = {args.next_track_num}")
+
     wav_dir = os.path.join(args.output_dir, 'wav_files')
     rip_cd_to_wav(args.first_track_nr, wav_dir, args.verbose)
 
 
 
-    convert_wav_to_mp3(wav_dir, args.title, args.artist, args.album, args.output_dir, args.album_nr, args.mp3_bitrate, args.first_track_nr, args.start_track_num, args.skip_last, args.nr_length, args.verbose)
+    convert_wav_to_mp3(wav_dir, args.title, args.artist, args.album, args.output_dir, args.album_nr, args.mp3_bitrate, args.first_track_nr, args.next_track_num, args.skip_last, args.nr_length, args.verbose)
 
     for wav_file in os.listdir(wav_dir):
         print(f"  Deletes file {wav_file} in {wav_dir,}.")
